@@ -24,10 +24,15 @@ import logging
 import textwrap
 from pathlib import Path
 
-from google.generativeai.generative_models import GenerativeModel
-from google.generativeai.types import GenerateContentResponse
-
 logger: logging.Logger = logging.getLogger(__name__)
+
+GEMINI_MODEL_MAP = {
+    "1.0-pro": "models/gemini-1.0-pro",
+    "1.5-flash": "models/gemini-1.5-flash-latest",
+    "1.5-pro": "models/gemini-1.5-pro-latest",
+    "2.5-flash": "models/gemini-2.5-flash",
+    "2.5-pro": "models/gemini-2.5-pro",
+}
 
 
 class SummaryError(Exception):
@@ -37,7 +42,8 @@ class SummaryError(Exception):
 
 
 def generate_summary(
-    gemini_model: GenerativeModel,
+    gemini_model_name: str,
+    gemini_api_key: str,
     user_language: str,
     input_file_path: Path,
 ) -> str | None:
@@ -48,7 +54,8 @@ def generate_summary(
     resulting summary.
 
     Args:
-        gemini_model: An initialized instance of the GenerativeModel.
+        gemini_model_name: The name of the Gemini model to use.
+        gemini_api_key: The API key for the Gemini service.
         user_language: The target language for the summary (e.g., 'en-US').
         input_file_path: The path to the text file to be summarized.
 
@@ -61,6 +68,15 @@ def generate_summary(
         SummaryError: If the API call fails or another exception occurs.
 
     """
+    import google.generativeai as genai
+    from google.generativeai.generative_models import GenerativeModel
+    from google.generativeai.types import GenerateContentResponse
+
+    genai.configure(api_key=gemini_api_key)
+    gemini_model: GenerativeModel = genai.GenerativeModel(
+        GEMINI_MODEL_MAP[gemini_model_name]
+    )
+
     if not input_file_path.exists():
         logger.error("Input file not found")
         raise FileNotFoundError("Input file not found")

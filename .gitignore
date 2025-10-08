@@ -4,6 +4,7 @@ uv.lock
 a.py
 a.html
 GEMINI.md
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

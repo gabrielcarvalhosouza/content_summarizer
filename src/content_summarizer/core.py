@@ -38,9 +38,7 @@ from pathlib import Path
 from shutil import rmtree
 from typing import Any
 
-import google.generativeai as genai
 from dotenv import load_dotenv
-from google.generativeai.generative_models import GenerativeModel
 from rich.console import Console
 from rich.markdown import Markdown
 
@@ -82,7 +80,6 @@ class AppConfig:
         youtube_service: The service for interacting with YouTube.
         cache_manager: The manager for cache file operations.
         config_manager: The manager for user configuration files.
-        gemini_model: The initialized Gemini GenerativeModel instance.
         url: The URL of the content to be summarized.
         output_path: The root directory for output files.
         keep_cache: A boolean to prevent cache deletion.
@@ -106,7 +103,6 @@ class AppConfig:
     youtube_service: YoutubeService
     cache_manager: CacheManager
     config_manager: ConfigManager
-    gemini_model: GenerativeModel
     url: str
     output_path: Path | None
     keep_cache: bool
@@ -154,7 +150,7 @@ def _resolve_config(
         "api_url": "",
         "api_key": "",
         "gemini_key": "",
-        "gemini_model": "2.5-flash",
+        "gemini_model_name": "2.5-flash",
         "whisper_model": "base",
         "beam_size": 5,
         "device": "auto",
@@ -267,14 +263,6 @@ def build_app_config(
         A populated AppConfig instance with all dependencies.
 
     """
-    GEMINI_MODEL_MAP = {
-        "1.0-pro": "models/gemini-1.0-pro",
-        "1.5-flash": "models/gemini-1.5-flash-latest",
-        "1.5-pro": "models/gemini-1.5-pro-latest",
-        "2.5-flash": "models/gemini-2.5-flash",
-        "2.5-pro": "models/gemini-2.5-pro",
-    }
-
     config_manager: ConfigManager = ConfigManager(path_manager.config_file_path)
     youtube_service: YoutubeService = YoutubeService()
     cache_manager: CacheManager = CacheManager()
@@ -285,18 +273,12 @@ def build_app_config(
 
     user_language: str = _get_user_system_language(logger)
 
-    genai.configure(api_key=final_config["gemini_key"])
-    gemini_model: GenerativeModel = genai.GenerativeModel(
-        GEMINI_MODEL_MAP[final_config["gemini_model"]]
-    )
-
     return AppConfig(
         logger=logger,
         path_manager=path_manager,
         youtube_service=youtube_service,
         cache_manager=cache_manager,
         config_manager=config_manager,
-        gemini_model=gemini_model,
         url=final_config["url"],
         output_path=(
             Path(final_config["output_path"]) if final_config["output_path"] else None
@@ -514,8 +496,10 @@ def summarize_video_pipeline(
                 summary = f.read()
 
         if not summary:
+            assert config.gemini_key
             summary = generate_summary(
-                config.gemini_model,
+                config.gemini_model_name,
+                config.gemini_key,
                 config.user_language,
                 source_path,
             )

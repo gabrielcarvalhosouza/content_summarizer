@@ -1,6 +1,6 @@
 [project]
 name = "content-summarizer"
-version = "1.0.3"
+version = "1.0.4"
 description = "A command-line tool to summarize YouTube videos using AI."
 authors = [
     { name = "Gabriel Carvalho", email = "gcarvalho2112@gmail.com" },
@@ -29,8 +29,8 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/CorvoCS08/content-summarizer"
-"Repository" = "https://github.com/CorvoCS08/content-summarizer"
+"Homepage" = "https://github.com/GabrielCarvalhoSouza/content_summarizer"
+"Repository" = "https://github.com/GabrielCarvalhoSouza/content_summarizer"
 
 [project.scripts]
 content-summarizer = "content_summarizer.main:main"

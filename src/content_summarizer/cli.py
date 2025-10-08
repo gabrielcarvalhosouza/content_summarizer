@@ -20,6 +20,7 @@ It is the main entry point for user interaction.
 # limitations under the License.
 
 import argparse
+from importlib import metadata
 from pathlib import Path
 
 WHISPER_MODEL_LIST = [
@@ -64,6 +65,19 @@ def parse_arguments() -> argparse.Namespace:
             "Example: content-summarizer summarize "
             "https://youtu.be/jNQXAC9IVRw?si=d_6O-o9B5Lv8ShI5 --q"
         ),
+    )
+
+    try:
+        version = metadata.version("content-summarizer")
+    except metadata.PackageNotFoundError:
+        version = "0.0.0 (local development)"
+
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"%(prog)s {version}",
+        help="Show the application's version and exit.",
     )
 
     subparsers = parser.add_subparsers(dest="command")

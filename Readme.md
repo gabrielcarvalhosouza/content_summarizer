@@ -2,16 +2,7 @@
 
 ## ✨ A tool to summarize YouTube videos using AI
 
-Ever found a YouTube video that seemed interesting but you didn't have time to watch it? With Content Summarizer, that's no longer a problem! Get high-quality summaries of any YouTube video for free through a simple and powerful command-line interface (CLI).
-
-## 🚀 Features
-
-- 🔍 **Smart Sourcing:** Automatically uses existing manual captions for speed, or falls back to highly accurate local transcription using Faster-Whisper.
-- 🧠 **Intelligent Summaries:** Leverages the Gemini API to generate clear, concise, and context-aware summaries.
-- 🌐 **Multi-language Support:** Delivers summaries in your system's native language.
-- 🔄 **Flexible Transcription:** Offers the choice between local processing (via Faster-Whisper) or a remote transcription API.
-- ⚡ **Performance Control:** Adjust the audio speed factor for faster transcriptions on local processing.
-- 💻 **Simple & Powerful CLI:** A clean and intuitive command-line interface for easy use.
+Content-Summarizer is a CLI program that summarize Youtube videos using Google Gemini.
 
 ## ⬇️ Installation
 

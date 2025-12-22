@@ -290,7 +290,7 @@ def build_app_config(
         api_url=final_config["api_url"],
         api_key=final_config["api_key"],
         gemini_key=final_config["gemini_key"],
-        gemini_model_name=final_config["gemini_model"],
+        gemini_model_name=final_config["gemini_model_name"],
         whisper_model=final_config["whisper_model"],
         beam_size=final_config["beam_size"],
         user_language=user_language,

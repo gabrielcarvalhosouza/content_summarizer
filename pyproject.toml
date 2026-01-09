@@ -3,7 +3,7 @@ name = "content-summarizer"
 version = "1.0.4"
 description = "A command-line tool to summarize YouTube videos using AI."
 authors = [
-    { name = "Gabriel Carvalho", email = "gcarvalho2112@gmail.com" },
+    { name = "Gabriel Carvalho", email = "contato@gcarvalho.com.br" },
 ]
 license = { file = "LICENSE" }
 readme = "README.md"

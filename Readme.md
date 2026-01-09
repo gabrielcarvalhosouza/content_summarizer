@@ -1,8 +1,8 @@
-# 📝Content Summarizer
+# Content Summarizer
 
-## ✨ A tool to summarize YouTube videos using AI
+## A tool to summarize YouTube videos using AI
 
-Content-Summarizer is a CLI program that summarize Youtube videos using Google Gemini.
+Content-Summarizer is a simple CLI program that summarize Youtube videos using Google Gemini.
 
 ## ⬇️ Installation
 
@@ -30,12 +30,12 @@ You can also use the standard `pip`, but be aware that it will install the packa
 pip install content-summarizer
 ```
 
-## 💡 Usage
+## Usage
 
 The application has two main commands: `summarize` and `config`.
 
-- 🎬 `summarize`: Fetches and summarizes a given YouTube URL. This is the main command.
-- ⚙️ `config`: Sets default values for flags, so you don't have to type them on every run. These settings are saved in a system-specific user configuration directory.
+- `summarize`: Fetches and summarizes a given YouTube URL. This is the main command.
+- `config`: Sets default values for flags, so you don't have to type them on every run. These settings are saved in a system-specific user configuration directory.
 
 For a full list of all commands and flags, run `content-summarizer --help`.
 
@@ -103,7 +103,7 @@ The application resolves settings with the following priority order:
 
 3. User Configuration: Defaults set via the `config` command.
 
-4. **Application Defaults:** The program's default values. You can see them [right here](https://github.com/CorvoCS08/content_sumarizer/blob/9f8329ff23bd8e070ad6cfd3770724981ea9d7ce/src/core.py#L148-L162).
+4. **Application Defaults:** The program's default values. You can see them [right here](https://github.com/gabrielcarvalhosouza/content_sumarizer/blob/9f8329ff23bd8e070ad6cfd3770724981ea9d7ce/src/core.py#L148-L162).
 
 ## 📡 Using the Remote Transcription API
 

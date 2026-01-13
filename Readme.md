@@ -4,7 +4,7 @@
 
 Content-Summarizer is a simple CLI program that summarize Youtube videos using Google Gemini.
 
-## ⬇️ Installation
+## Installation
 
 ### Prerequisites
 
@@ -93,7 +93,7 @@ content-summarizer config --api-key "YOUR_OWN_DEPLOYED_API_KEY_HERE"
 content-summarizer config --gemini-key "YOUR_GOOGLE_AI_KEY_HERE"
 ```
 
-## 🛠️ Configuration
+## Configuration
 
 The application resolves settings with the following priority order:
 
@@ -105,7 +105,7 @@ The application resolves settings with the following priority order:
 
 4. **Application Defaults:** The program's default values. You can see them [right here](https://github.com/gabrielcarvalhosouza/content_sumarizer/blob/9f8329ff23bd8e070ad6cfd3770724981ea9d7ce/src/core.py#L148-L162).
 
-## 📡 Using the Remote Transcription API
+## Using the Remote Transcription API
 
 The `--api` flag allows you to offload transcription to a remote server. This project includes a simple Flask API in the `flask_api/` directory that you can deploy yourself.
 
@@ -133,6 +133,6 @@ python -c "import secrets, string; print(''.join(secrets.choice(string.ascii_let
 
 A detailed deployment guide is beyond the scope of this README.
 
-## 📄 License
+## License
 
 This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.

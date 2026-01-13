@@ -151,7 +151,7 @@ def _resolve_config(
         "api_url": "",
         "api_key": "",
         "gemini_key": "",
-        "gemini_model_name": "2.5-flash",
+        "gemini_model_name": "3-flash",
         "whisper_model": "base",
         "beam_size": 5,
         "device": "auto",

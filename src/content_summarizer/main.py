@@ -59,7 +59,9 @@ def main() -> None:
         summarize_video_pipeline(args, logger, path_manager)
         logger.info("Application completed successfully")
     except Exception:
+        logger.info(f"Full traceback saved to: {path_manager.log_file_path}")
         logger.critical("Fatal error occurred. Exiting application")
+
         sys.exit(1)
 
 

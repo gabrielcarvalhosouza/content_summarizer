@@ -1,6 +1,6 @@
 [project]
 name = "content-summarizer"
-version = "1.0.4"
+version = "1.0.5"
 description = "A command-line tool to summarize YouTube videos using AI."
 authors = [
     { name = "Gabriel Carvalho", email = "contato@gcarvalho.com.br" },
@@ -18,7 +18,7 @@ classifiers = [
     "Environment :: Console",
 ]
 dependencies = [
-    "google-generativeai>=0.8.5",
+    "google-genai>=0.1.0",
     "python-dotenv>=1.1.0",
     "pytubefix>=9.1.2",
     "requests>=2.32.4",

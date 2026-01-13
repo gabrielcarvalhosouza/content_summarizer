@@ -27,11 +27,10 @@ from pathlib import Path
 logger: logging.Logger = logging.getLogger(__name__)
 
 GEMINI_MODEL_MAP = {
-    "1.0-pro": "models/gemini-1.0-pro",
-    "1.5-flash": "models/gemini-1.5-flash-latest",
-    "1.5-pro": "models/gemini-1.5-pro-latest",
-    "2.5-flash": "models/gemini-2.5-flash",
-    "2.5-pro": "models/gemini-2.5-pro",
+    "2.5-flash": "gemini-2.5-flash",
+    "2.5-pro": "gemini-2.5-pro",
+    "3-flash": "gemini-3-flash-preview",
+    "3-pro": "gemini-3-pro-preview",
 }
 
 
@@ -68,14 +67,12 @@ def generate_summary(
         SummaryError: If the API call fails or another exception occurs.
 
     """
-    import google.generativeai as genai
-    from google.generativeai.generative_models import GenerativeModel
-    from google.generativeai.types import GenerateContentResponse
+    from google import genai
+    from google.genai import types
 
-    genai.configure(api_key=gemini_api_key)
-    gemini_model: GenerativeModel = genai.GenerativeModel(
-        GEMINI_MODEL_MAP[gemini_model_name]
-    )
+    client: genai.Client = genai.Client(api_key=gemini_api_key)
+
+    model_name: str = GEMINI_MODEL_MAP.get(gemini_model_name, gemini_model_name)
 
     if not input_file_path.exists():
         logger.error("Input file not found")
@@ -98,7 +95,10 @@ def generate_summary(
             """)  # noqa: E501
     try:
         logger.info("Generating summary")
-        res: GenerateContentResponse = gemini_model.generate_content(prompt)
+        res: types.GenerateContentResponse = client.models.generate_content(
+            model=model_name,
+            contents=prompt,
+        )
         logger.info("Summary generated successfully")
         return res.text
     except Exception as e:

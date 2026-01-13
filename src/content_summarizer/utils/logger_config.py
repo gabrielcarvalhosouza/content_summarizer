@@ -107,11 +107,13 @@ def setup_logging(log_file_path: Path, quiet_level: int) -> None:
                     (0=info, 1=warning, 2+=silent).
 
     """
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.WARNING)
 
-    if logger.hasHandlers():
-        logger.handlers.clear()
+    logging.getLogger("content_summarizer").setLevel(logging.INFO)
+
+    if root_logger.hasHandlers():
+        root_logger.handlers.clear()
 
     console_handler = colorlog.StreamHandler(sys.stderr)
     console_handler.setLevel(logging.INFO)
@@ -131,5 +133,10 @@ def setup_logging(log_file_path: Path, quiet_level: int) -> None:
     )
     file_handler.setFormatter(file_formatter)
 
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
+    root_logger.addHandler(console_handler)
+    root_logger.addHandler(file_handler)
+
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("google").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)

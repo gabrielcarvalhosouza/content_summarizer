@@ -33,11 +33,10 @@ WHISPER_MODEL_LIST = [
 ]
 
 GEMINI_MODEL_LIST = [
-    "1.0-pro",
-    "1.5-flash",
-    "1.5-pro",
     "2.5-flash",
     "2.5-pro",
+    "3-flash",
+    "3-pro",
 ]
 
 DEVICES_LIST = [
@@ -159,6 +158,7 @@ def parse_arguments() -> argparse.Namespace:
         "-g",
         "--gemini-model",
         type=str,
+        dest="gemini_model_name",
         choices=GEMINI_MODEL_LIST,
         help="Specify the Gemini model to use for summarization.",
     )
@@ -239,6 +239,7 @@ def parse_arguments() -> argparse.Namespace:
         "-g",
         "--gemini-model",
         type=str,
+        dest="gemini_model_name",
         choices=GEMINI_MODEL_LIST,
         help="Specify the default Gemini model to use for summarization.",
     )

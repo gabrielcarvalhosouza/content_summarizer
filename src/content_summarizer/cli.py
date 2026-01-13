@@ -47,6 +47,14 @@ DEVICES_LIST = [
     "auto",
 ]
 
+COMPUTE_TYPES_LIST = [
+    "int8",
+    "float16",
+    "float32",
+    "int8_float16",
+    "auto",
+]
+
 
 def parse_arguments() -> argparse.Namespace:
     """Set up and parse all command-line arguments.
@@ -178,6 +186,13 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     parser_summarize.add_argument(
+        "--compute-type",
+        type=str,
+        choices=COMPUTE_TYPES_LIST,
+        help="Specify the compute type for local transcription",
+    )
+
+    parser_summarize.add_argument(
         "--no-terminal",
         action="store_true",
         help="Disable printing the final summary to the terminal.",
@@ -248,6 +263,13 @@ def parse_arguments() -> argparse.Namespace:
         type=str,
         choices=DEVICES_LIST,
         help="Specify the default device for local transcription",
+    )
+
+    parser_config.add_argument(
+        "--compute-type",
+        type=str,
+        choices=COMPUTE_TYPES_LIST,
+        help="Specify the default compute type for local transcription",
     )
 
     return parser.parse_args()

@@ -41,7 +41,11 @@ class TranscriptionError(Exception):
 
 
 def fetch_transcription_local(
-    audio_file_path: Path, whisper_model_name: str, beam_size: int, device: str
+    audio_file_path: Path,
+    whisper_model_name: str,
+    beam_size: int,
+    device: str,
+    compute_type: str,
 ) -> str:
     """Transcribe an audio file locally using a Whisper model.
 
@@ -53,6 +57,7 @@ def fetch_transcription_local(
         whisper_model_name: The name of the Whisper model to use.
         beam_size: The beam size for the transcription process.
         device: The device to run the model on (e.g., 'cuda', 'cpu').
+        compute_type: The compute type for the model (e.g., 'int8', 'float16').
 
     Returns:
         The transcribed text as a string.
@@ -64,8 +69,7 @@ def fetch_transcription_local(
     from faster_whisper import WhisperModel
     from faster_whisper.transcribe import Segment
 
-    compute_type: str = "auto"
-    if device == "cpu":
+    if device == "cpu" and compute_type == "auto":
         compute_type = "int8"
     try:
         whisper_model = WhisperModel(

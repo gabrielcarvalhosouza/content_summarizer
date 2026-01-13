@@ -87,7 +87,7 @@ content-summarizer config -o "YOUR_OUTPUT_PATH_HERE"
 content-summarizer config -s 1.5
 
 # Specify default API KEY
-content-summarizer config --api-key "YOUR_OWN_WHISPER_API_KEY_HERE"
+content-summarizer config --api-key "YOUR_OWN_DEPLOYED_API_KEY_HERE"
 
 # Specify default Google AI Studio API KEY
 content-summarizer config --gemini-key "YOUR_GOOGLE_AI_KEY_HERE"

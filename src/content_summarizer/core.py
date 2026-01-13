@@ -116,6 +116,7 @@ class AppConfig:
     whisper_model: str
     beam_size: int
     device: str
+    compute_type: str
     no_terminal: bool
     user_language: str
 
@@ -154,6 +155,7 @@ def _resolve_config(
         "whisper_model": "base",
         "beam_size": 5,
         "device": "auto",
+        "compute_type": "auto",
         "no_terminal": False,
     }
 
@@ -296,6 +298,7 @@ def build_app_config(
         user_language=user_language,
         no_terminal=final_config["no_terminal"],
         device=final_config["device"],
+        compute_type=final_config["compute_type"],
     )
 
 
@@ -356,6 +359,7 @@ def _save_transcription(
                 config.whisper_model,
                 config.beam_size,
                 config.device,
+                config.compute_type,
             ),
         }
 

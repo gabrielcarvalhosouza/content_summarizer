@@ -217,7 +217,7 @@ def parse_arguments() -> argparse.Namespace:
 
     parser_summarize.add_argument(
         "--ollama-ctx",
-        type=str,
+        type=int,
         help="Specify the Ollama model context window for summarization.",
     )
 
@@ -325,7 +325,7 @@ def parse_arguments() -> argparse.Namespace:
 
     parser_config.add_argument(
         "--ollama-ctx",
-        type=str,
+        type=int,
         help="Specify the default Ollama model context window for summarization.",
     )
 

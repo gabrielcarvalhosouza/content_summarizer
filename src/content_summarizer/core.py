@@ -522,11 +522,8 @@ def summarize_video_pipeline(
                 summary = f.read()
 
         if not summary:
-            assert config.gemini_key
             summary = generate_summary(
-                config.gemini_model_name,
-                config.gemini_key,
-                config.user_language,
+                config,
                 source_path,
             )
 

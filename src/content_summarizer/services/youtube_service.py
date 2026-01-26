@@ -18,14 +18,17 @@ and caption fetching.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
+
 import logging
 from pathlib import Path
-from typing import Self
-
-from pytubefix import Stream, YouTube
-from pytubefix.captions import Caption
+from typing import TYPE_CHECKING, Self
 
 from content_summarizer.services.video_service_interface import BaseVideoService
+
+if TYPE_CHECKING:
+    from pytubefix import Stream, YouTube
+    from pytubefix.captions import Caption
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -60,6 +63,8 @@ class YoutubeService(BaseVideoService):
             The instance of the YouTube service.
 
         """
+        from pytubefix import YouTube
+
         self._yt = YouTube(source_url)
         logger.info('Loaded video: "%s" from URL: "%s"', self.title, source_url)
         return self

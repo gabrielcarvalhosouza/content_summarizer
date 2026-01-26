@@ -23,13 +23,8 @@ Functions:
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import logging
-from collections.abc import Iterable
 from pathlib import Path
-from typing import IO
-
-import requests
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -66,6 +61,8 @@ def fetch_transcription_local(
         TranscriptionError: If the transcription process fails for any reason.
 
     """
+    from collections.abc import Iterable
+
     from faster_whisper import WhisperModel
     from faster_whisper.transcribe import Segment
 
@@ -109,6 +106,11 @@ def fetch_transcription_api(api_url: str, audio_file_path: Path, api_key: str) -
         TranscriptionError: If the API request fails or returns an error.
 
     """
+    import json
+    from typing import IO
+
+    import requests
+
     try:
         with audio_file_path.open("rb") as f:
             files: dict[str, IO[bytes]] = {"audio": f}

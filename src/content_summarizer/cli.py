@@ -54,6 +54,8 @@ COMPUTE_TYPES_LIST = [
     "auto",
 ]
 
+PROVIDERS_LIST = ["gemini", "ollama"]
+
 
 def parse_arguments() -> argparse.Namespace:
     """Set up and parse all command-line arguments.
@@ -193,6 +195,33 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     parser_summarize.add_argument(
+        "-p",
+        "--provider",
+        type=str,
+        choices=PROVIDERS_LIST,
+        help="Specify the provider for summarization",
+    )
+
+    parser_summarize.add_argument(
+        "--ollama-model",
+        dest="ollama_model_name",
+        type=str,
+        help="Specify the Ollama model for summarization.",
+    )
+
+    parser_summarize.add_argument(
+        "--ollama-url",
+        type=str,
+        help="Specify the Ollama URL for summarization.",
+    )
+
+    parser_summarize.add_argument(
+        "--ollama-ctx",
+        type=str,
+        help="Specify the Ollama model context window for summarization.",
+    )
+
+    parser_summarize.add_argument(
         "--no-terminal",
         action="store_true",
         help="Disable printing the final summary to the terminal.",
@@ -271,6 +300,33 @@ def parse_arguments() -> argparse.Namespace:
         type=str,
         choices=COMPUTE_TYPES_LIST,
         help="Specify the default compute type for local transcription",
+    )
+
+    parser_config.add_argument(
+        "-p",
+        "--provider",
+        type=str,
+        choices=PROVIDERS_LIST,
+        help="Specify the default provider for summarization",
+    )
+
+    parser_config.add_argument(
+        "--ollama-model",
+        dest="ollama_model_name",
+        type=str,
+        help="Specify the default Ollama model for summarization.",
+    )
+
+    parser_config.add_argument(
+        "--ollama-url",
+        type=str,
+        help="Specify the default Ollama URL for summarization.",
+    )
+
+    parser_config.add_argument(
+        "--ollama-ctx",
+        type=str,
+        help="Specify the default Ollama model context window for summarization.",
     )
 
     return parser.parse_args()

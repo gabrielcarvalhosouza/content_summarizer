@@ -1,6 +1,6 @@
 [project]
 name = "content-summarizer"
-version = "1.1.0"
+version = "1.2.0"
 description = "A command-line tool to summarize YouTube videos using AI."
 authors = [
     { name = "Gabriel Carvalho", email = "contato@gcarvalho.com.br" },
@@ -8,7 +8,7 @@ authors = [
 license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.11, <3.12"
-keywords = ["youtube", "summarizer", "ai", "gemini", "whisper", "cli"]
+keywords = ["youtube", "summarizer", "ai", "gemini", "ollama", "whisper", "cli"]
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
@@ -26,11 +26,12 @@ dependencies = [
     "faster-whisper>=1.1.1",
     "platformdirs>=4.3.8",
     "rich>=13.9.4",
+    "openai>=2.15.0",
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/GabrielCarvalhoSouza/content_summarizer"
-"Repository" = "https://github.com/GabrielCarvalhoSouza/content_summarizer"
+"Homepage" = "https://github.com/gabrielcarvalhosouza/content_summarizer"
+"Repository" = "https://github.com/gabrielcarvalhosouza/content_summarizer"
 
 [project.scripts]
 content-summarizer = "content_summarizer.main:main"

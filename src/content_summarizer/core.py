@@ -39,8 +39,6 @@ from shutil import rmtree
 from typing import Any
 
 from dotenv import load_dotenv
-from rich.console import Console
-from rich.markdown import Markdown
 
 from content_summarizer.data.data_models import VideoMetadata
 from content_summarizer.managers.cache_manager import CacheManager
@@ -85,11 +83,14 @@ class AppConfig:
         keep_cache: A boolean to prevent cache deletion.
         quiet: The console verbosity level.
         speed_factor: The audio acceleration factor.
+        gemini_key: The API key for the Gemini service.
+        gemini_model_name: The name of the Gemini model being used.
+        ollama_model_name: The name of the Ollama model being used.
+        ollama_url: The URL for the Ollama service.
+        ollama_ctx: The context window for Ollama.
         api: A boolean to select the remote transcription API.
         api_url: The URL for the remote transcription API.
         api_key: The API key for the remote transcription API.
-        gemini_key: The API key for the Gemini service.
-        gemini_model_name: The name of the Gemini model being used.
         whisper_model: The name of the local Whisper model being used.
         beam_size: The beam size for local transcription.
         device: The device for local transcription (e.g., 'cuda', 'cpu').
@@ -108,11 +109,15 @@ class AppConfig:
     keep_cache: bool
     quiet: int
     speed_factor: float
+    provider: str
+    gemini_key: str | None
+    gemini_model_name: str
+    ollama_model_name: str
+    ollama_url: str
+    ollama_ctx: int
     api: bool
     api_url: str | None
     api_key: str | None
-    gemini_key: str | None
-    gemini_model_name: str
     whisper_model: str
     beam_size: int
     device: str
@@ -147,11 +152,15 @@ def _resolve_config(
         "keep_cache": False,
         "quiet": 0,
         "speed_factor": 1.25,
+        "provider": "gemini",
+        "gemini_key": "",
+        "gemini_model_name": "3-flash",
+        "ollama_model_name": "",
+        "ollama_url": "http://localhost:11434/v1",
+        "ollama_ctx": 16384,
         "api": False,
         "api_url": "",
         "api_key": "",
-        "gemini_key": "",
-        "gemini_model_name": "3-flash",
         "whisper_model": "base",
         "beam_size": 5,
         "device": "auto",
@@ -165,11 +174,14 @@ def _resolve_config(
 
     load_dotenv(path_manager.parent_path / ".env")
     gemini_key: str | None = os.getenv("GEMINI_API_KEY")
+    ollama_url: str | None = os.getenv("OLLAMA_API_URL")
     api_url: str | None = os.getenv("API_URL")
     api_key: str | None = os.getenv("TRANSCRIPTION_API_KEY")
 
     if gemini_key:
         final_config["gemini_key"] = gemini_key
+    if ollama_url:
+        final_config["ollama_url"] = ollama_url
     if api_url:
         final_config["api_url"] = api_url
     if api_key:
@@ -202,18 +214,24 @@ def _check_required_config_params(
         ValueError: If a required parameter is missing.
 
     """
-    if final_config["gemini_key"] == "":
+    if final_config.get("provider") == "gemini" and not final_config.get("gemini_key"):
         logger.error("Gemini API key is required, use the --gemini-key flag")
         raise ValueError("Gemini API key is required")
 
-    if not final_config["api"]:
+    if final_config.get("provider") == "ollama" and not final_config.get(
+        "ollama_model_name"
+    ):
+        logger.error("Ollama model name is required, use the --ollama-model-name flag")
+        raise ValueError("Ollama model name is required")
+
+    if not final_config.get("api"):
         return
 
-    if not final_config["api_url"]:
+    if not final_config.get("api_url"):
         logger.error("API URL is required when API mode is enabled")
         raise ValueError("API URL is required when API mode is enabled")
 
-    if not final_config["api_key"]:
+    if not final_config.get("api_key"):
         logger.error("API key is required when API mode is enabled")
         raise ValueError("API key is required when API mode is enabled")
 
@@ -288,11 +306,15 @@ def build_app_config(
         keep_cache=final_config["keep_cache"],
         quiet=final_config["quiet"],
         speed_factor=final_config["speed_factor"],
+        provider=final_config["provider"],
+        gemini_key=final_config["gemini_key"],
+        gemini_model_name=final_config["gemini_model_name"],
+        ollama_model_name=final_config["ollama_model_name"],
+        ollama_url=final_config["ollama_url"],
+        ollama_ctx=final_config["ollama_ctx"],
         api=final_config["api"],
         api_url=final_config["api_url"],
         api_key=final_config["api_key"],
-        gemini_key=final_config["gemini_key"],
-        gemini_model_name=final_config["gemini_model_name"],
         whisper_model=final_config["whisper_model"],
         beam_size=final_config["beam_size"],
         user_language=user_language,
@@ -514,6 +536,9 @@ def summarize_video_pipeline(
             )
 
         if summary and not config.no_terminal:
+            from rich.console import Console
+            from rich.markdown import Markdown
+
             console: Console = Console()
             markdown_summary: Markdown = Markdown(summary)
             console.print("-" * console.width)

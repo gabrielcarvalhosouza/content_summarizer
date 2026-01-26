@@ -8,7 +8,16 @@ Content-Summarizer is a simple CLI program that summarize Youtube videos using G
 
 ### Prerequisites
 
-You need to have Python 3.11+ and FFmpeg installed on your system.
+Before you begin, ensure you have the following installed:
+
+1.  **Python 3.11+**
+2.  **FFmpeg** (Required for audio processing):
+    - **Windows:** `winget install ffmpeg` (or add to PATH manually)
+    - **Linux:** `sudo apt install ffmpeg`
+    - **macOS:** `brew install ffmpeg`
+3.  **Ollama** (Optional - Only if you want to run local models):
+    - Download from [ollama.com](https://ollama.com)
+    - Pull a model: `ollama pull mistral` (or llama3, gemma, etc.)
 
 ### Recommended Installation
 

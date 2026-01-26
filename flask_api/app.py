@@ -86,6 +86,11 @@ def transcribe() -> Response | tuple[Response, int]:
         - 500 Internal Server Error: If an unexpected error occurs.
 
     """
+    logger.warning(
+        "DEPRECATION WARNING: The remote API feature (--api, --api-url)"
+        " is deprecated and WILL BE REMOVED in version 2.0.0. "
+    )
+
     provided_api_key: str | None = request.headers.get("X-Api-Key")
     assert api_secret_key
     if not provided_api_key or not hmac.compare_digest(

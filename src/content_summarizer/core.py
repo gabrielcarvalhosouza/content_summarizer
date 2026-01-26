@@ -495,6 +495,12 @@ def summarize_video_pipeline(
         logger.exception("An error occurred during the setup")
         raise SetupError("An error occurred during the setup") from e
 
+    if args.api or args.api_url:
+        logger.warning(
+            "DEPRECATION WARNING: The remote API feature (--api, --api-url)"
+            " is deprecated and WILL BE REMOVED in version 2.0.0. "
+        )
+
     try:
         _log_success: bool = True
         if not config.keep_cache:

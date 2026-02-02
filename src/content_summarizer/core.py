@@ -271,6 +271,7 @@ def _get_user_system_language(logger: logging.Logger) -> str:
         logger.warning("Failed to detect locale, using default: %s", DEFAULT_LOCALE)
         lang_code = DEFAULT_LOCALE
 
+    logger.info("Detected locale: %s", lang_code)
     return lang_code.split(".")[0].replace("_", "-")
 
 

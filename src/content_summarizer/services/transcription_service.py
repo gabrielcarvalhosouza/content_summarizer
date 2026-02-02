@@ -66,6 +66,8 @@ def fetch_transcription_local(
     from faster_whisper import WhisperModel
     from faster_whisper.transcribe import Segment
 
+    from content_summarizer.utils.env_utils import suppress_locale_crash
+
     if device == "cpu" and compute_type == "auto":
         compute_type = "int8"
     try:
@@ -75,10 +77,11 @@ def fetch_transcription_local(
         logger.info("Initializing transcription")
 
         segments: Iterable[Segment]
-        segments, _ = whisper_model.transcribe(
-            str(audio_file_path), beam_size=beam_size
-        )
-        transcription_text: str = "".join(segment.text for segment in segments)
+        with suppress_locale_crash():
+            segments, _ = whisper_model.transcribe(
+                str(audio_file_path), beam_size=beam_size
+            )
+            transcription_text: str = "".join(segment.text for segment in segments)
 
         logger.info("Transcription completed")
         return transcription_text

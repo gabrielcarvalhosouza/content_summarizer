@@ -45,6 +45,7 @@ def main() -> None:
     except locale.Error:
         os.environ["LC_ALL"] = "C.UTF-8"
         os.environ["LC_CTYPE"] = "C.UTF-8"
+
     setup_warnings()
     args = parse_arguments()
     path_manager: PathManager = PathManager()

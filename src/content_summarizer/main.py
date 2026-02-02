@@ -19,7 +19,9 @@ core functions. It acts as the primary orchestrator and final error handler.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import locale
 import logging
+import os
 import sys
 
 from content_summarizer.cli import parse_arguments
@@ -38,6 +40,11 @@ def main() -> None:
     unhandled exceptions.
 
     """
+    try:
+        locale.setlocale(locale.LC_ALL, "")
+    except locale.Error:
+        os.environ["LC_ALL"] = "C.UTF-8"
+        os.environ["LC_CTYPE"] = "C.UTF-8"
     setup_warnings()
     args = parse_arguments()
     path_manager: PathManager = PathManager()

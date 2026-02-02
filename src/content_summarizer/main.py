@@ -20,7 +20,6 @@ core functions. It acts as the primary orchestrator and final error handler.
 # limitations under the License.
 
 import logging
-import os
 import sys
 
 from content_summarizer.cli import parse_arguments
@@ -39,11 +38,6 @@ def main() -> None:
     unhandled exceptions.
 
     """
-    if os.environ.get("LC_ALL") is None:
-        os.environ["LC_ALL"] = "C.UTF-8"
-    if os.environ.get("LANG") is None:
-        os.environ["LANG"] = "C.UTF-8"
-
     setup_warnings()
     args = parse_arguments()
     path_manager: PathManager = PathManager()

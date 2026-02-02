@@ -1,39 +1,55 @@
+import locale
 import os
 from collections.abc import Generator
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 
 
 @contextmanager
 def suppress_locale_crash() -> Generator[None, None, None]:
     """Temporarily forces a safe locale to prevent PyAV/FFmpeg crashes.
 
-    This context manager overrides the `LANG` and `LC_ALL` environment variables
-    to 'C.UTF-8' for the duration of the context. This is required to prevent
-    underlying C libraries (such as those used by PyAV) from crashing when
-    decoding non-ASCII characters in log outputs on systems with specific
-    locales (e.g., pt_BR).
+    This context manager overrides both the process-wide locale (via `setlocale`)
+    and the environment variables to 'C' or 'C.UTF-8'. This is critical for
+    libraries like PyAV that link directly to C runtimes, as they read the
+    active locale configuration, not just environment variables.
 
-    The original environment variables are safely restored upon exit.
+    The original locale settings are strictly restored upon exit.
 
     Yields:
         None: Control is yielded back to the caller with the modified environment.
 
     """
-    old_lang = os.environ.get("LANG")
-    old_lc = os.environ.get("LC_ALL")
+    old_env_lang = os.environ.get("LANG")
+    old_env_lc = os.environ.get("LC_ALL")
 
-    os.environ["LANG"] = "C.UTF-8"
-    os.environ["LC_ALL"] = "C.UTF-8"
+    old_locale = None
+    with suppress(locale.Error):
+        old_locale = locale.setlocale(locale.LC_ALL, None)
+
+    os.environ["LANG"] = "C"
+    os.environ["LC_ALL"] = "C"
+
+    try:
+        locale.setlocale(locale.LC_ALL, "C")
+    except locale.Error:
+        with suppress(locale.Error):
+            locale.setlocale(locale.LC_ALL, "C.UTF-8")
 
     try:
         yield
     finally:
-        if old_lang:
-            os.environ["LANG"] = old_lang
-        else:
+        if old_env_lang is not None:
+            os.environ["LANG"] = old_env_lang
+
+        if old_env_lang is None:
             os.environ.pop("LANG", None)
 
-        if old_lc:
-            os.environ["LC_ALL"] = old_lc
-        else:
+        if old_env_lc is not None:
+            os.environ["LC_ALL"] = old_env_lc
+
+        if old_env_lc is None:
             os.environ.pop("LC_ALL", None)
+
+        if old_locale:
+            with suppress(locale.Error):
+                locale.setlocale(locale.LC_ALL, old_locale)

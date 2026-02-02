@@ -258,6 +258,14 @@ def _get_user_system_language(logger: logging.Logger) -> str:
     except locale.Error:
         lang_code = None
 
+    if lang_code == "C" or not lang_code:
+        lang_code = (
+            os.environ.get("LC_ALL")
+            or os.environ.get("LC_MESSAGES")
+            or os.environ.get("LANG")
+            or os.environ.get("LANGUAGE")
+        )
+
     if not lang_code:
         logger.warning("Failed to detect locale, using default: %s", DEFAULT_LOCALE)
         lang_code = DEFAULT_LOCALE

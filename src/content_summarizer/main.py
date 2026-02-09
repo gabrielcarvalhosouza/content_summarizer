@@ -25,7 +25,7 @@ import os
 import sys
 
 from content_summarizer.cli import parse_arguments
-from content_summarizer.core import handle_config_command, summarize_video_pipeline
+from content_summarizer.core import handle_config_command, handle_summarize_command
 from content_summarizer.managers.path_manager import PathManager
 from content_summarizer.utils.logger_config import setup_logging
 from content_summarizer.utils.warning_config import setup_warnings
@@ -58,7 +58,7 @@ def main() -> None:
         if args.command == "config":
             handle_config_command(args, logger, path_manager)
             return
-        summarize_video_pipeline(args, logger, path_manager)
+        handle_summarize_command(args, logger, path_manager)
         logger.info("Application completed successfully")
     except Exception:
         logger.info(f"Full traceback saved to: {path_manager.log_file_path}")

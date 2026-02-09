@@ -110,7 +110,6 @@ def _summarize_gemini(
 
     transcription_content: str = _read_transcription(input_file_path)
 
-    print(f"Idioma do Sistema: {config.user_language}")
     system_instructions: str = SYSTEM_PROMPT_TEMPLATE.format(
         user_language=config.user_language
     )

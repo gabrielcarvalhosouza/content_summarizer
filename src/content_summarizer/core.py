@@ -276,7 +276,7 @@ def _get_user_system_language(logger: logging.Logger) -> str:
     return lang_code
 
 
-def build_app_config(
+def _build_app_config(
     args: argparse.Namespace, logger: logging.Logger, path_manager: PathManager
 ) -> AppConfig:
     """Initialize and build the complete AppConfig object.
@@ -477,41 +477,48 @@ def _prepare_source_file(
     return transcription_file_path
 
 
-def summarize_video_pipeline(
-    args: argparse.Namespace, logger: logging.Logger, path_manager: PathManager
-) -> None:
-    """Run the main video summarization pipeline.
+def _prepare_video_pipeline(logger: logging.Logger, config: AppConfig) -> None:
+    """Prepare the application state for processing.
 
-    This function orchestrates the entire workflow, from setting up the
-    configuration and loading video info to preparing the source text and
-    generating the final summary. It contains the primary error handling for
-    the application's workflow.
+    This function loads the video information from the URL provided in the
+    configuration and sets the video ID in the path manager. This is the
+    initialization phase of the pipeline.
 
     Args:
-        args: The parsed command-line arguments from the user.
         logger: The application's configured logger.
-        path_manager: The application's path manager.
+        config: The application's configuration object.
 
     Raises:
-        PipelineError: If an error occurs during the main processing stage.
-        SetupError: If an error occurs during the initial setup stage.
+        SetupError: If the video cannot be loaded or the ID cannot be set.
 
     """
-    config: AppConfig | None = None
     try:
-        config = build_app_config(args, logger, path_manager)
         config.youtube_service.load_from_url(config.url)
         config.path_manager.set_video_id(config.youtube_service.video_id)
     except Exception as e:
         logger.exception("An error occurred during the setup")
         raise SetupError("An error occurred during the setup") from e
 
-    if args.api or args.api_url:
-        logger.warning(
-            "DEPRECATION WARNING: The remote API feature (--api, --api-url)"
-            " is deprecated and WILL BE REMOVED in version 2.0.0. "
-        )
 
+def _summarize_video_pipeline(
+    logger: logging.Logger,
+    config: AppConfig,
+) -> None:
+    """Execute the core summarization logic.
+
+    This function runs the main stages of the pipeline: finding captions,
+    downloading/transcribing audio (if necessary), generating the summary
+    using AI, and saving/displaying the results. It also handles cache
+    cleanup upon completion.
+
+    Args:
+        logger: The application's configured logger.
+        config: The application's configuration object.
+
+    Raises:
+        PipelineError: If any error occurs during the processing stages.
+
+    """
     try:
         _log_success: bool = True
         if not config.keep_cache:
@@ -524,7 +531,7 @@ def summarize_video_pipeline(
 
         source_path = _prepare_source_file(config, caption, _log_success)
 
-        summary_file_path: Path = path_manager.get_summary_path(
+        summary_file_path: Path = config.path_manager.get_summary_path(
             config.gemini_model_name,
             config.user_language,
             config.whisper_model,
@@ -560,11 +567,12 @@ def summarize_video_pipeline(
             console.print("-" * console.width)
 
         if summary and config.output_path:
-            summary_output_path: Path = path_manager.get_final_summary_path(
+            summary_output_path: Path = config.path_manager.get_final_summary_path(
                 config.youtube_service.title, config.output_path
             )
-            # False because we have an better log message literally below
-            config.cache_manager.save_text_file(summary, summary_output_path, False)
+            config.cache_manager.save_text_file(
+                summary, summary_output_path, log_success=False
+            )
             logger.info(f"Summary saved to {summary_output_path}")
 
     except Exception as e:
@@ -574,9 +582,37 @@ def summarize_video_pipeline(
         _keep_cache: bool = config.cache_manager.read_keep_cache_flag(
             config.path_manager.metadata_file_path
         )
-        if path_manager.video_dir_path.exists() and not _keep_cache:
-            rmtree(path_manager.video_dir_path)
+        if config.path_manager.video_dir_path.exists() and not _keep_cache:
+            rmtree(config.path_manager.video_dir_path)
             logger.info("Cache cleared")
+
+
+def handle_summarize_command(
+    args: argparse.Namespace, logger: logging.Logger, path_manager: PathManager
+) -> None:
+    """Run the complete video summarization workflow.
+
+    This function acts as the controller for the 'summarize' command. It
+    builds the configuration, orchestrates the setup phase, and triggers
+    the execution phase.
+
+    Args:
+        args: The parsed command-line arguments.
+        logger: The application's configured logger.
+        path_manager: The application's path manager.
+
+    """
+    if args.api or args.api_url:
+        logger.warning(
+            "DEPRECATION WARNING: The remote API feature (--api, --api-url)"
+            " is deprecated and WILL BE REMOVED in version 2.0.0. "
+        )
+
+    config: AppConfig = _build_app_config(args, logger, path_manager)
+
+    _prepare_video_pipeline(logger, config)
+
+    _summarize_video_pipeline(logger, config)
 
 
 def handle_config_command(

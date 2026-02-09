@@ -1,146 +1,152 @@
 # Content Summarizer
 
-## A tool to summarize YouTube videos using AI
+Summarize YouTube videos in seconds using AI (**Google Gemini** or **Ollama**).
 
-Content-Summarizer is a simple CLI program that summarize Youtube videos using Google Gemini.
+**Content-Summarizer** is a CLI tool that downloads YouTube audio, transcribes it locally using **Faster-Whisper** (or uses captions if available), and generates dense, structured summaries using LLMs.
+
+---
 
 ## Installation
 
 ### Prerequisites
 
-Before you begin, ensure you have the following installed:
+- **Python 3.11+**
+- **FFmpeg** (Required for audio processing):
+  - **Windows:** `winget install ffmpeg`
+  - **Linux:** `sudo apt install ffmpeg`
+  - **macOS:** `brew install ffmpeg`
 
-1.  **Python 3.11+**
-2.  **FFmpeg** (Required for audio processing):
-    - **Windows:** `winget install ffmpeg` (or add to PATH manually)
-    - **Linux:** `sudo apt install ffmpeg`
-    - **macOS:** `brew install ffmpeg`
-3.  **Ollama** (Optional - Only if you want to run local models):
-    - Download from [ollama.com](https://ollama.com)
-    - Pull a model: `ollama pull mistral` (or llama3, gemma, etc.)
+### Installing (Recommended)
 
-### Recommended Installation
-
-The best way to install is using `uv` to keep the environment isolated:
+Use `uv` or `pipx` to install in an isolated environment:
 
 ```bash
+# Via UV
 uv tool install content-summarizer
-```
 
-Or if you prefer to use `pipx`:
-
-```bash
+# Via Pipx
 pipx install content-summarizer
 ```
 
-You can also use the standard `pip`, but be aware that it will install the package in your global or current environment:
+---
+
+## First Steps
+
+Before running your first summary, you must configure your default AI provider. You only need to do this once.
+
+### Option A: Using Google Gemini
+
+1. Get your free key at [Google AI Studio](https://aistudio.google.com/).
+2. Run:
 
 ```bash
-pip install content-summarizer
+content-summarizer config --provider gemini --gemini-key "YOUR_API_KEY_HERE" --gemini-model "3-flash"
 ```
+
+### Option B: Using Ollama
+
+1. Ensure you have [Ollama](https://ollama.com/) installed and running (`ollama serve`).
+2. Run (Example using Mistral, ensure you ran `ollama pull mistral` first):
+
+```bash
+content-summarizer config --provider ollama --ollama-model "mistral" --ollama-ctx 16384
+```
+
+---
 
 ## Usage
 
-The application has two main commands: `summarize` and `config`.
+The application has two main commands: `summarize` (the main action) and `config` (to set persistent defaults).
 
-- `summarize`: Fetches and summarizes a given YouTube URL. This is the main command.
-- `config`: Sets default values for flags, so you don't have to type them on every run. These settings are saved in a system-specific user configuration directory.
+### 1. The `summarize` Command
 
-For a full list of all commands and flags, run `content-summarizer --help`.
+Fetches, processes, and summarizes a video.
 
-### The `summarize` Command
-
-**Basic Usage**
+**Syntax:**
 
 ```bash
-content-summarizer summarize "YOUR_YOUTUBE_URL_HERE"
+content-summarizer summarize "YOUTUBE_URL" [OPTIONS]
 ```
 
-#### Common Summarize Flags
+**Common Options:**
+
+- **Core:**
+  - `-o, --output-path <path>`: Directory to save the final `.md` file.
+  - `-c, --keep-cache`: Keep temporary files (audio/transcription) after finishing.
+  - `--no-terminal`: Do not print the summary to the console.
+  - `-q`: Decrease verbosity (warnings only / `-qq` for silent).
+
+- **Audio & Transcription:**
+  - `-s, --speed-factor <float>`: Accelerate audio (e.g., `2.0` for 2x speed). Saves transcription time.
+  - `-w, --whisper-model <model>`: Model size (`tiny`, `base`, `small`, `medium`, `large-v2`).
+  - `--device <device>`: Hardware (`cuda`, `cpu`, `mps`).
+
+- **AI Providers:**
+  - `-p, --provider <name>`: `gemini` or `ollama`.
+  - `-g, --gemini-model <name>`: E.g., `3-flash`, `3-pro`.
+  - `--ollama-model <name>`: E.g., `mistral`, `llama3`.
+
+---
+
+### 2. The `config` Command
+
+Sets default values so you don't have to type flags every time.
+
+**Syntax:**
 
 ```bash
-# Change the audio speed factor for faster transcriptions
-content-summarizer summarize "YOUR_YOUTUBE_URL_HERE" -s 2.5
-
-# Change Whisper (Faster-Whisper) Model
-content-summarizer summarize "YOUR_YOUTUBE_URL_HERE" -w large-v2
-
-# Change Gemini Model
-content-summarizer summarize "YOUR_YOUTUBE_URL_HERE" -g 2.5-pro
-
-# Decrease console verbosity (shows only warnings and errors)
-content-summarizer summarize "YOUR_YOUTUBE_URL_HERE" -q
-
-# Make the console output completely silent (summary output still works)
-content-summarizer summarize "YOUR_YOUTUBE_URL_HERE" -qq
-
-# Disable the summary output in the terminal
-content-summarizer summarize "YOUR_YOUTUBE_URL_HERE" --no-terminal
-
-# Specify an output path for the creation of an output summary file alongside the normal terminal output
-content-summarizer summarize "YOUR_YOUTUBE_URL_HERE" -o "YOUR_OUTPUT_PATH_HERE"
-
-# Keep the cache directory after execution for re-runs
-content-summarizer summarize "YOUR_YOUTUBE_URL_HERE" -c
+content-summarizer config [OPTIONS]
 ```
 
-### The `config` Command
-
-#### Common Config Flags
+**Examples:**
 
 ```bash
-# Specify default output path
-content-summarizer config -o "YOUR_OUTPUT_PATH_HERE"
+# Set default download path
+content-summarizer config -o "path/to/summaries"
 
-# Specify default speed factor
+# Set default audio speed to 1.5x
 content-summarizer config -s 1.5
 
-# Specify default API KEY
-content-summarizer config --api-key "YOUR_OWN_DEPLOYED_API_KEY_HERE"
-
-# Specify default Google AI Studio API KEY
-content-summarizer config --gemini-key "YOUR_GOOGLE_AI_KEY_HERE"
+# Switch default provider to Ollama
+content-summarizer config -p ollama --ollama-model mistral
 ```
 
-## Configuration
+---
 
-The application resolves settings with the following priority order:
+## Application Defaults
 
-1. Command-line Flags: Always takes top priority for the current run.
+If you do not provide specific flags or configuration, the application uses the following internal default values:
 
-2. Environment Variables: Loaded from an `.env` file or system environments.
+| Parameter          | Default Value               | Description                                  |
+| :----------------- | :-------------------------- | :------------------------------------------- |
+| **Provider**       | `gemini`                    | The AI service used for summarization.       |
+| **Gemini Model**   | `3-flash`                   | The specific Google Gemini model version.    |
+| **Whisper Model**  | `base`                      | The local model size used for transcription. |
+| **Speed Factor**   | `1.25`                      | Audio acceleration (1.25x speed).            |
+| **Beam Size**      | `5`                         | Beam search size for transcription decoding. |
+| **Device**         | `auto`                      | `cuda` (GPU), `mps` (Mac), or `cpu`.         |
+| **Compute Type**   | `auto`                      | Quantization (e.g., `int8`, `float16`).      |
+| **Ollama URL**     | `http://localhost:11434/v1` | Local address for Ollama server.             |
+| **Ollama Context** | `16384`                     | Context window size for local LLMs.          |
 
-3. User Configuration: Defaults set via the `config` command.
+---
 
-4. **Application Defaults:** The program's default values. You can see them [right here](https://github.com/gabrielcarvalhosouza/content_sumarizer/blob/9f8329ff23bd8e070ad6cfd3770724981ea9d7ce/src/core.py#L148-L162).
+## Configuration Priority
 
-## Using the Remote Transcription API
+The application resolves settings in the following order (highest to lowest priority):
 
-The `--api` flag allows you to offload transcription to a remote server. This project includes a simple Flask API in the `flask_api/` directory that you can deploy yourself.
+1.  **Command-line Flags:** (e.g., passing `-s 2.0` overwrites everything).
+2.  **Environment Variables:** Loaded from `.env`.
+3.  **User Configuration:** Values set via the `config` command.
+4.  **Application Defaults:** Internal hardcoded values.
 
-To set up the API, you will need to install its specific dependencies:
+---
 
-```bash
-# Navigate to the api directory
-cd flask_api/
+## Important Notes
 
-# Install the API dependencies
-uv pip install -r requirements.txt
-```
+- **Remote API:** The remote transcription API support (`--api`, `--api-url`) is **DEPRECATED** and will be removed in version 2.0.0. Please migrate to local processing (Whisper).
 
-To use this feature, you must:
-
-1.  Deploy the application found in the `flask_api/` folder to a server of your choice.
-2.  Use the `--api-url` and `--api-key` flags (or set them as defaults using the `config` command) to point the CLI to your deployed API.
-
-Fell free to use your own API key, you just need to put it in the API `.env`. I recommend the use of the following script to generate a safe API key, just copy and paste in any terminal:
-
-```bash
-
-python -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(30)))"
-```
-
-A detailed deployment guide is beyond the scope of this README.
+---
 
 ## License
 

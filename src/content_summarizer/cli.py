@@ -69,11 +69,21 @@ def parse_arguments() -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(
         prog="content-summarizer",
-        description="A tool to summarize YouTube videos.",
-        epilog=(
-            "Example: content-summarizer summarize "
-            "https://youtu.be/jNQXAC9IVRw?si=d_6O-o9B5Lv8ShI5 --q"
+        description=(
+            "An automated tool for transcribing and summarizing YouTube videos "
+            "using local Whisper models and AI providers like Gemini and Ollama."
         ),
+        epilog=(
+            "Quick Start:\n"
+            "  1. Configure your API key: content-summarizer config "
+            "--gemini-key YOUR_KEY\n"
+            "  2. Summarize a video: content-summarizer summarize "
+            "https://www.youtube.com/watch?v=VIDEO_ID\n"
+            "\n"
+            "For more details on a specific command, run: "
+            "content-summarizer <command> --help"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     try:
@@ -96,237 +106,238 @@ def parse_arguments() -> argparse.Namespace:
         help="Summarize a YouTube video from a given URL.",
     )
 
-    parser_summarize.add_argument("url", type=str, help="The URL of the YouTube video.")
-
-    parser_summarize.add_argument(
+    core_group = parser_summarize.add_argument_group("Core Options")
+    core_group.add_argument(
+        "url", type=str, help="The URL of the YouTube video to summarize."
+    )
+    core_group.add_argument(
         "-o",
         "--output-path",
         type=Path,
-        help="Specify a custom directory for output files.",
+        help="Custom directory for saving generated files.",
     )
-
-    parser_summarize.add_argument(
+    core_group.add_argument(
         "-c",
         "--keep-cache",
         action="store_true",
-        help=(
-            "Prevent the deletion of cache files after execution. "
-            "Once used for a video, its cache will be permanently kept "
-            "unless the cache folder is manually deleted."
-        ),
+        help="Keep downloaded and processed files after completion.",
     )
-
-    parser_summarize.add_argument(
+    core_group.add_argument(
+        "--no-terminal",
+        action="store_true",
+        help="Do not print the final summary to the console.",
+    )
+    core_group.add_argument(
         "-q",
         "--quiet",
         action="count",
         default=0,
-        help="Decrease console verbosity. Use -q for warnings/errors, -qq for silent.",
+        help="Lower verbosity level (-q for warnings, -qq for silent).",
     )
 
-    parser_summarize.add_argument(
+    audio_group = parser_summarize.add_argument_group("Audio Options")
+    audio_group.add_argument(
         "-s",
         "--speed-factor",
         type=float,
-        help="Specify the audio speed factor for acceleration (e.g., 1.5).",
+        help="Factor to speed up audio processing (e.g., 2.0 for 2x speed).",
     )
 
-    parser_summarize.add_argument(
+    whisper_group = parser_summarize.add_argument_group(
+        "Local Transcription Options (Whisper)"
+    )
+    whisper_group.add_argument(
+        "-w",
+        "--whisper-model",
+        type=str,
+        choices=WHISPER_MODEL_LIST,
+        help="Whisper model size for local transcription.",
+    )
+    whisper_group.add_argument(
+        "-b",
+        "--beam-size",
+        type=int,
+        help="Beam size for the transcription decoding process.",
+    )
+    whisper_group.add_argument(
+        "--device",
+        type=str,
+        choices=DEVICES_LIST,
+        help="Hardware device for processing (e.g., 'cuda', 'cpu').",
+    )
+    whisper_group.add_argument(
+        "--compute-type",
+        type=str,
+        choices=COMPUTE_TYPES_LIST,
+        help="Quantization type for local computation.",
+    )
+
+    api_group = parser_summarize.add_argument_group(
+        "API Transcription Options (Deprecated)"
+    )
+    api_group.add_argument(
         "-a",
         "--api",
         action="store_true",
-        help="Use a remote API for transcription instead of local processing.",
+        help="[Deprecated] Use a remote API for transcription.",
     )
-
-    parser_summarize.add_argument(
+    api_group.add_argument(
         "--api-url",
         type=str,
-        help="Specify the URL of the remote transcription API.",
+        help="[Deprecated] URL of the remote transcription service.",
     )
-
-    parser_summarize.add_argument(
+    api_group.add_argument(
         "--api-key",
         type=str,
-        help="Specify the API key for the remote transcription API.",
+        help="[Deprecated] Authentication key for the remote transcription service.",
     )
 
-    parser_summarize.add_argument(
+    provider_group = parser_summarize.add_argument_group("Summarization Options")
+    provider_group.add_argument(
+        "-p",
+        "--provider",
+        type=str,
+        choices=PROVIDERS_LIST,
+        help="AI service provider for content summarization.",
+    )
+
+    gemini_group = parser_summarize.add_argument_group("Gemini AI Settings")
+    gemini_group.add_argument(
         "--gemini-key",
         type=str,
-        help="Specify the Google AI Studio API key.",
+        help="API Key for Google Gemini AI.",
     )
-
-    parser_summarize.add_argument(
+    gemini_group.add_argument(
         "-g",
         "--gemini-model",
         type=str,
         dest="gemini_model_name",
         choices=GEMINI_MODEL_LIST,
-        help="Specify the Gemini model to use for summarization.",
+        help="Specific Gemini model version to use.",
     )
 
-    parser_summarize.add_argument(
-        "-w",
-        "--whisper-model",
-        type=str,
-        choices=WHISPER_MODEL_LIST,
-        help="Specify the Whisper model for local transcription.",
-    )
-
-    parser_summarize.add_argument(
-        "-b",
-        "--beam-size",
-        type=int,
-        help="Specify the beam size for local Whisper transcription.",
-    )
-
-    parser_summarize.add_argument(
-        "--device",
-        type=str,
-        choices=DEVICES_LIST,
-        help="Specify the device for local transcription",
-    )
-
-    parser_summarize.add_argument(
-        "--compute-type",
-        type=str,
-        choices=COMPUTE_TYPES_LIST,
-        help="Specify the compute type for local transcription",
-    )
-
-    parser_summarize.add_argument(
-        "-p",
-        "--provider",
-        type=str,
-        choices=PROVIDERS_LIST,
-        help="Specify the provider for summarization",
-    )
-
-    parser_summarize.add_argument(
+    ollama_group = parser_summarize.add_argument_group("Ollama AI Settings")
+    ollama_group.add_argument(
         "--ollama-model",
         dest="ollama_model_name",
         type=str,
-        help="Specify the Ollama model for summarization.",
+        help="Name of the model running on Ollama.",
     )
-
-    parser_summarize.add_argument(
+    ollama_group.add_argument(
         "--ollama-url",
         type=str,
-        help="Specify the Ollama URL for summarization.",
+        help="Endpoint URL for the Ollama instance.",
     )
-
-    parser_summarize.add_argument(
+    ollama_group.add_argument(
         "--ollama-ctx",
         type=int,
-        help="Specify the Ollama model context window for summarization.",
-    )
-
-    parser_summarize.add_argument(
-        "--no-terminal",
-        action="store_true",
-        help="Disable printing the final summary to the terminal.",
+        help="Context window size for the Ollama model.",
     )
 
     parser_config = subparsers.add_parser(
         "config",
-        help="Specify the default configuration values.",
+        help="Manage default configuration settings for the application.",
     )
 
-    parser_config.add_argument(
+    core_cfg = parser_config.add_argument_group("Core Settings")
+    core_cfg.add_argument(
         "-o",
         "--output-path",
         type=Path,
-        help="Specify the default custom directory for output files.",
+        help="Default directory for saving generated files.",
     )
 
-    parser_config.add_argument(
+    audio_cfg = parser_config.add_argument_group("Audio Settings")
+    audio_cfg.add_argument(
         "-s",
         "--speed-factor",
         type=float,
-        help="Specify the default audio speed factor for acceleration (e.g., 1.5).",
+        help="Default factor to speed up audio processing.",
     )
 
-    parser_config.add_argument(
+    whisper_cfg = parser_config.add_argument_group(
+        "Local Transcription Settings (Whisper)"
+    )
+    whisper_cfg.add_argument(
+        "-w",
+        "--whisper-model",
+        type=str,
+        choices=WHISPER_MODEL_LIST,
+        help="Default Whisper model size for local transcription.",
+    )
+    whisper_cfg.add_argument(
+        "-b",
+        "--beam-size",
+        type=int,
+        help="Default beam size for transcription.",
+    )
+    whisper_cfg.add_argument(
+        "--device",
+        type=str,
+        choices=DEVICES_LIST,
+        help="Default hardware device (e.g., 'cuda', 'cpu').",
+    )
+    whisper_cfg.add_argument(
+        "--compute-type",
+        type=str,
+        choices=COMPUTE_TYPES_LIST,
+        help="Default quantization type for computation.",
+    )
+
+    api_cfg = parser_config.add_argument_group(
+        "API Transcription Settings (Deprecated)"
+    )
+    api_cfg.add_argument(
         "--api-url",
         type=str,
-        help="Specify the default URL of the remote transcription API.",
+        help="[Deprecated] Default URL for remote transcription.",
     )
-
-    parser_config.add_argument(
+    api_cfg.add_argument(
         "--api-key",
         type=str,
-        help="Specify the default API key for the remote transcription API.",
+        help="[Deprecated] Default key for remote transcription.",
     )
 
-    parser_config.add_argument(
+    provider_cfg = parser_config.add_argument_group("Summarization Settings")
+    provider_cfg.add_argument(
+        "-p",
+        "--provider",
+        type=str,
+        choices=PROVIDERS_LIST,
+        help="Default AI service provider for summarization.",
+    )
+
+    gemini_cfg = parser_config.add_argument_group("Gemini AI Settings")
+    gemini_cfg.add_argument(
         "--gemini-key",
         type=str,
-        help="Specify the default Google AI Studio API key.",
+        help="Default API Key for Google Gemini AI.",
     )
-
-    parser_config.add_argument(
+    gemini_cfg.add_argument(
         "-g",
         "--gemini-model",
         type=str,
         dest="gemini_model_name",
         choices=GEMINI_MODEL_LIST,
-        help="Specify the default Gemini model to use for summarization.",
+        help="Default Gemini model version.",
     )
 
-    parser_config.add_argument(
-        "-w",
-        "--whisper-model",
-        type=str,
-        choices=WHISPER_MODEL_LIST,
-        help="Specify the default Whisper model for local transcription.",
-    )
-
-    parser_config.add_argument(
-        "-b",
-        "--beam-size",
-        type=int,
-        help="Specify the default beam size for local Whisper transcription.",
-    )
-
-    parser_config.add_argument(
-        "--device",
-        type=str,
-        choices=DEVICES_LIST,
-        help="Specify the default device for local transcription",
-    )
-
-    parser_config.add_argument(
-        "--compute-type",
-        type=str,
-        choices=COMPUTE_TYPES_LIST,
-        help="Specify the default compute type for local transcription",
-    )
-
-    parser_config.add_argument(
-        "-p",
-        "--provider",
-        type=str,
-        choices=PROVIDERS_LIST,
-        help="Specify the default provider for summarization",
-    )
-
-    parser_config.add_argument(
+    ollama_cfg = parser_config.add_argument_group("Ollama AI Settings")
+    ollama_cfg.add_argument(
         "--ollama-model",
         dest="ollama_model_name",
         type=str,
-        help="Specify the default Ollama model for summarization.",
+        help="Default model name for Ollama.",
     )
-
-    parser_config.add_argument(
+    ollama_cfg.add_argument(
         "--ollama-url",
         type=str,
-        help="Specify the default Ollama URL for summarization.",
+        help="Default endpoint URL for Ollama.",
     )
-
-    parser_config.add_argument(
+    ollama_cfg.add_argument(
         "--ollama-ctx",
         type=int,
-        help="Specify the default Ollama model context window for summarization.",
+        help="Default context window size for Ollama.",
     )
 
     return parser.parse_args()
